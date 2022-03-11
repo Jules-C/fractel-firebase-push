@@ -1,13 +1,8 @@
 import { registerPlugin } from '@capacitor/core';
 
-import type { FirebasePushPluginPlugin } from './definitions';
+import type { FirebasePushPlugin } from './definitions';
 
-const FirebasePushPlugin = registerPlugin<FirebasePushPluginPlugin>(
-  'FirebasePushPlugin',
-  {
-    web: () => import('./web').then(m => new m.FirebasePushPluginWeb()),
-  },
-);
+const FirebasePush = registerPlugin<FirebasePushPlugin>('FirebasePush');
 
 export * from './definitions';
-export { FirebasePushPlugin };
+export { FirebasePush };

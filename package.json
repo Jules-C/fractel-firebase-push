@@ -52,6 +52,7 @@
   "devDependencies": {
     "@capacitor/android": "^3.0.0",
     "@capacitor/core": "^3.0.0",
+    "@capacitor/cli": "^3.4.3",
     "@capacitor/docgen": "^0.0.18",
     "@capacitor/ios": "^3.0.0",
     "@ionic/eslint-config": "^0.3.0",
@@ -63,7 +64,15 @@
     "rimraf": "^3.0.2",
     "rollup": "^2.32.0",
     "swiftlint": "^1.0.1",
-    "typescript": "~4.0.3"
+    "typescript": "~4.0.3",
+    "@commitlint/config-conventional": "13.2.0",
+    "@saithodev/semantic-release-backmerge": "1.5.3",
+    "@semantic-release/changelog": "6.0.0",
+    "@semantic-release/exec": "6.0.1",
+    "@semantic-release/git": "10.0.0",
+    "@semantic-release/npm": "8.0.0",
+    "semantic-release": "19.0.2",
+    "doctoc": "2.0.1"
   },
   "peerDependencies": {
     "@capacitor/core": "^3.0.0",
@@ -81,8 +90,5 @@
     "android": {
       "src": "android"
     }
-  },
-  "dependencies": {
-    "@capacitor/cli": "^3.4.3"
   }
 }

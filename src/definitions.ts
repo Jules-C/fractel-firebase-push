@@ -1,4 +1,6 @@
+/// <reference types="@capacitor/cli" />
 import type { PermissionState, PluginListenerHandle } from '@capacitor/core';
+
 export declare type PresentationOption = 'badge' | 'sound' | 'alert';
 declare module '@capacitor/cli' {
     export interface PluginsConfig {

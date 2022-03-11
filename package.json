@@ -81,5 +81,8 @@
     "android": {
       "src": "android"
     }
+  },
+  "dependencies": {
+    "@capacitor/cli": "^3.4.3"
   }
 }

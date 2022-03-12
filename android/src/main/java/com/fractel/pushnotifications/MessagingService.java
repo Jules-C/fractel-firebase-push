@@ -18,6 +18,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -36,6 +37,8 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MessagingService extends FirebaseMessagingService {
 
@@ -43,7 +46,7 @@ public class MessagingService extends FirebaseMessagingService {
 
   // VoIP
   private static final String CHANNEL_VOIP = "Voip";
-  private static final String CHANNEL_NAME = "FracTELfoneVoip";
+  private static final String CHANNEL_NAME = "FracTELfone Call";
   private BroadcastReceiver voipNotificationActionBR;
   public static final int VOIP_NOTIFICATION_ID = 168697;
   public static final int oneTimeID = (int) SystemClock.uptimeMillis();
@@ -151,6 +154,7 @@ public class MessagingService extends FirebaseMessagingService {
         .setOngoing(true)
         // Set ringtone to notification (< Android O)
         .setSound(defaultRingtoneUri());
+
     // automatically cancels after 30 seconds
     // .setTimeoutAfter(30000);
 
@@ -159,14 +163,16 @@ public class MessagingService extends FirebaseMessagingService {
     NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
     // Display notification
     notificationManager.notify(VOIP_NOTIFICATION_ID, incomingCallNotification);
-
+    new TimerTaskExample(20);
     // Add broadcast receiver for notification button actions
     if (voipNotificationActionBR == null) {
       IntentFilter filter = new IntentFilter();
       filter.addAction(IncomingCallActivity.VOIP_ACCEPT);
       filter.addAction(IncomingCallActivity.VOIP_DECLINE);
+      filter.addAction(IncomingCallActivity.VOIP_MISSED);
       Log.d(TAG, "Initializing BR");
       Context appContext = this.getApplicationContext();
+      String finalCaller = caller;
       voipNotificationActionBR = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -176,6 +182,7 @@ public class MessagingService extends FirebaseMessagingService {
 
           // Handle action
           dismissVOIPNotification();
+
           String voipStatus = intent.getAction();
           // Update Webhook status to CONNECTED
           // updateWebhookVOIPStatus(callbackUrl, callId, voipStatus);
@@ -201,6 +208,9 @@ public class MessagingService extends FirebaseMessagingService {
             FirebasePushPlugin.onNewRemoteMessage(remoteMessage);
             // FirebasePushPlugin.sendRemoteMessage(remoteMessage);
           }
+          if (voipStatus.equals(IncomingCallActivity.VOIP_MISSED)) {
+            showMissedCallNotification(finalCaller);
+          }
         }
       };
       Log.d(TAG, "registering BR");
@@ -212,6 +222,60 @@ public class MessagingService extends FirebaseMessagingService {
     NotificationManagerCompat.from(this).cancel(VOIP_NOTIFICATION_ID);
     if (IncomingCallActivity.instance != null) {
       IncomingCallActivity.instance.finish();
+    }
+  }
+
+  private void showMissedCallNotification(String caller) {
+    dismissVOIPNotification();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      int importance = NotificationManager.IMPORTANCE_HIGH;
+      NotificationChannel channel = new NotificationChannel("missedCall", CHANNEL_NAME, importance);
+      channel.setDescription("Channel For VOIP Missed Calls");
+      // Register the channel with the system; you can't change the importance
+      // or other notification behaviors after this
+      NotificationManager notificationManager = getSystemService(NotificationManager.class);
+      notificationManager.createNotificationChannel(channel);
+      }
+
+      Intent declineIntent = new Intent(IncomingCallActivity.VOIP_DECLINE);
+    PendingIntent declinePendingIntent = PendingIntent.getBroadcast(this, 20, declineIntent, 0);
+
+      NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "missedCall");
+      notificationBuilder.setContentTitle("Missed call")
+        .setContentText(caller)
+        .setSmallIcon(getResources().getIdentifier("pushicon", "drawable", getPackageName()))
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        // Make notification dismiss on user input action
+        .setAutoCancel(true)
+        // Cannot be swiped by user
+        .setOngoing(false)
+        // Set ringtone to notification (< Android O)
+        .setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+        // Show decline action
+//        .addAction(new NotificationCompat.Action(0, "Dismiss",
+//            declinePendingIntent));
+      Notification missedCallNotification = notificationBuilder.build();
+
+      NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+      notificationManager.notify(
+        VOIP_NOTIFICATION_ID,
+        missedCallNotification);
+    }
+
+  public class TimerTaskExample {
+    Timer timer; // creating a variable named timer of type Timer
+
+    public TimerTaskExample(int seconds) {
+      timer = new Timer(); // creating an instance of the timer class
+      timer.schedule(new Reminder(), seconds * 1000);
+    }
+
+    class Reminder extends TimerTask {
+      public void run() {
+      //  showMissedCallNotification();
+        System.out.println("Incoming Call stopped, missed call notification..");
+        timer.cancel(); // Terminate the timer thread
+      }
     }
   }
 

@@ -72,7 +72,7 @@ public class MessagingService extends FirebaseMessagingService {
   }
 
   // VoIP implementation
-  private Intent intentForLaunchActivity() {
+  public Intent intentForLaunchActivity() {
     PackageManager pm = getPackageManager();
     return pm.getLaunchIntentForPackage(getApplicationContext().getPackageName());
   }
@@ -205,7 +205,7 @@ public class MessagingService extends FirebaseMessagingService {
             myEdit.commit();
 
             startActivity(intentForLaunchActivity());
-            FirebasePushPlugin.onNewRemoteMessage(remoteMessage);
+            //FirebasePushPlugin.onNewRemoteMessage(remoteMessage);
             // FirebasePushPlugin.sendRemoteMessage(remoteMessage);
           }
           if (voipStatus.equals(IncomingCallActivity.VOIP_MISSED)) {
@@ -227,6 +227,7 @@ public class MessagingService extends FirebaseMessagingService {
 
   private void showMissedCallNotification(String caller) {
     dismissVOIPNotification();
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       int importance = NotificationManager.IMPORTANCE_HIGH;
       NotificationChannel channel = new NotificationChannel("missedCall", CHANNEL_NAME, importance);
@@ -237,14 +238,18 @@ public class MessagingService extends FirebaseMessagingService {
       notificationManager.createNotificationChannel(channel);
       }
 
-      Intent declineIntent = new Intent(IncomingCallActivity.VOIP_DECLINE);
-    PendingIntent declinePendingIntent = PendingIntent.getBroadcast(this, 20, declineIntent, 0);
+      Intent notificationIntent = new Intent(intentForLaunchActivity());
+      notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+      notificationIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+      PendingIntent contentIntent = PendingIntent.getActivity(this, oneTimeID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
       NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "missedCall");
       notificationBuilder.setContentTitle("Missed call")
         .setContentText(caller)
         .setSmallIcon(getResources().getIdentifier("pushicon", "drawable", getPackageName()))
         .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setContentIntent(contentIntent)
         // Make notification dismiss on user input action
         .setAutoCancel(true)
         // Cannot be swiped by user

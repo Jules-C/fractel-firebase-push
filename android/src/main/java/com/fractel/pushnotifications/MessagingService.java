@@ -159,7 +159,7 @@ public class MessagingService extends FirebaseMessagingService {
     // .setTimeoutAfter(30000);
 
     Notification incomingCallNotification = notificationBuilder.build();
-
+    incomingCallNotification.flags |= Notification.FLAG_INSISTENT | Notification.FLAG_NO_CLEAR;
     NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
     // Display notification
     notificationManager.notify(VOIP_NOTIFICATION_ID, incomingCallNotification);

@@ -1,11 +1,14 @@
 package com.fractel.pushnotifications;
 
+import static java.util.concurrent.TimeUnit.*;
+
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.media.Ringtone;
 import android.os.Build;
@@ -27,6 +30,11 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 public class IncomingCallActivity extends AppCompatActivity {
 
   private static final String TAG = "PushPluginIncomingCall";
@@ -34,6 +42,7 @@ public class IncomingCallActivity extends AppCompatActivity {
     public static final String VOIP_CONNECTED = "connected";
     public static final String VOIP_ACCEPT = "pickup";
     public static final String VOIP_DECLINE = "declined_callee";
+    public static final String VOIP_MISSED = "missed_call";
     String channelId = "ongoing_call_channel";
 
     private static final int NOTIFICATION_MESSAGE_ID = 1337;
@@ -85,6 +94,7 @@ public class IncomingCallActivity extends AppCompatActivity {
         });
 
         drawableCompat.start();
+      new TimerTaskExample(20);
     }
 
     @Override
@@ -145,6 +155,11 @@ public class IncomingCallActivity extends AppCompatActivity {
         sendBroadcast(declineIntent);
     }
 
+    void missedIncomingVoIP() {
+        Intent missedIntent = new Intent(IncomingCallActivity.VOIP_MISSED);
+        sendBroadcast(missedIntent);
+    }
+
     private void showUnlockScreenNotification() {
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
@@ -190,4 +205,23 @@ public class IncomingCallActivity extends AppCompatActivity {
             }
         }
     }
+  public class TimerTaskExample {
+    Timer timer;  //creating a variable named timer of type Timer
+    public TimerTaskExample(int seconds) {
+      timer = new Timer(); //creating an instance of the timer class
+      timer.schedule(new Reminder(), seconds * 1000);
+    }
+    class Reminder extends TimerTask {
+      public void run() {
+        missedIncomingVoIP();
+        //finish();
+        SharedPreferences sharedPref = getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.clear();
+        editor.apply();
+        System.out.println("Incoming Call stopped, cleared..");
+        timer.cancel(); // Terminate the timer thread
+      }
+    }
+  }
 }

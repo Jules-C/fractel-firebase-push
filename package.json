@@ -1,6 +1,6 @@
 {
   "name": "fractel-push-notifications",
-  "version": "0.0.1",
+  "version": "0.0.0-development",
   "description": "Custom Capacitor Plugin for Incoming call and regular push notifications with Firebase",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -17,7 +17,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jules-C/fractel-push-notifications.git"
+    "url": "https://github.com/Jules-C/fractel-push-notifications.git"
   },
   "bugs": {
     "url": "https://github.com/Jules-C/fractel-push-notifications/issues"
@@ -47,32 +47,33 @@
     "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.js",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "semantic-release": "semantic-release"
   },
   "devDependencies": {
     "@capacitor/android": "^3.0.0",
-    "@capacitor/core": "^3.0.0",
     "@capacitor/cli": "^3.4.3",
+    "@capacitor/core": "^3.0.0",
     "@capacitor/docgen": "^0.0.18",
     "@capacitor/ios": "^3.0.0",
+    "@commitlint/config-conventional": "13.2.0",
     "@ionic/eslint-config": "^0.3.0",
     "@ionic/prettier-config": "^1.0.1",
     "@ionic/swiftlint-config": "^1.1.2",
-    "eslint": "^7.11.0",
-    "prettier": "~2.2.0",
-    "prettier-plugin-java": "~1.0.0",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.32.0",
-    "swiftlint": "^1.0.1",
-    "typescript": "~4.0.3",
-    "@commitlint/config-conventional": "13.2.0",
     "@saithodev/semantic-release-backmerge": "1.5.3",
     "@semantic-release/changelog": "6.0.0",
     "@semantic-release/exec": "6.0.1",
     "@semantic-release/git": "10.0.0",
     "@semantic-release/npm": "8.0.0",
-    "semantic-release": "19.0.2",
-    "doctoc": "2.0.1"
+    "doctoc": "2.0.1",
+    "eslint": "^7.11.0",
+    "prettier": "~2.2.0",
+    "prettier-plugin-java": "~1.0.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.32.0",
+    "semantic-release": "^19.0.2",
+    "swiftlint": "^1.0.1",
+    "typescript": "~4.0.3"
   },
   "peerDependencies": {
     "@capacitor/core": "^3.0.0",
@@ -90,5 +91,8 @@
     "android": {
       "src": "android"
     }
+  },
+  "dependencies": {
+    "fractel-push-notifications": "^0.0.1"
   }
 }

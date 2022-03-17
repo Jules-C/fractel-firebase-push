@@ -1,8 +1,5 @@
 package com.fractel.pushnotifications;
 
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -19,13 +16,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.widget.EditText;
 
-import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -34,8 +26,6 @@ import androidx.core.app.NotificationManagerCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -92,7 +82,7 @@ public class MessagingService extends FirebaseMessagingService {
       // Set ringtone to notification (>= Android O)
       AudioAttributes audioAttributes = new AudioAttributes.Builder()
           .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-          .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+          .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
           .build();
       channel.setSound(defaultRingtoneUri(), audioAttributes);
 
@@ -163,7 +153,7 @@ public class MessagingService extends FirebaseMessagingService {
     NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
     // Display notification
     notificationManager.notify(VOIP_NOTIFICATION_ID, incomingCallNotification);
-    new TimerTaskExample(20);
+    new TimerTaskExample(28);
     // Add broadcast receiver for notification button actions
     if (voipNotificationActionBR == null) {
       IntentFilter filter = new IntentFilter();
@@ -277,9 +267,14 @@ public class MessagingService extends FirebaseMessagingService {
 
     class Reminder extends TimerTask {
       public void run() {
-      //  showMissedCallNotification();
+        //dismissVOIPNotification();
+        missedIncomingVoIP();
         System.out.println("Incoming Call stopped, missed call notification..");
         timer.cancel(); // Terminate the timer thread
+      }
+      void missedIncomingVoIP() {
+        Intent missedIntent = new Intent(IncomingCallActivity.VOIP_MISSED);
+        sendBroadcast(missedIntent);
       }
     }
   }

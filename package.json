@@ -1,6 +1,6 @@
 {
   "name": "fractel-push-notifications",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "Custom Capacitor Plugin for Incoming call and regular push notifications with Firebase",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",

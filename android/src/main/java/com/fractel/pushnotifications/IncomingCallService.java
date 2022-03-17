@@ -42,7 +42,7 @@ public class IncomingCallService extends Service {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .setContentTitle("Incoming call")
-                        .setContentText("(919) 555-1234")
+                        .setContentText("(321) 779-8888")
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setCategory(NotificationCompat.CATEGORY_CALL)
 

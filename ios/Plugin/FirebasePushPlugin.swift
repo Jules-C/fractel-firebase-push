@@ -5,17 +5,28 @@ import FirebaseMessaging
 import FirebaseInstallations
 import FirebaseCore
 
+enum PushNotificationError: Error {
+    case tokenParsingFailed
+    case tokenRegistrationFailed
+}
+enum PushNotificationsPermissions: String {
+    case prompt
+    case denied
+    case granted
+  }
+
 @objc(FirebasePushPlugin)
 public class FirebasePushPlugin: CAPPlugin, MessagingDelegate {
-    private var notificationDelegateHandler = FirebasePushNotificationsHandler()
+    private var notificationDelegateHandler = FirebasePushNotificationsHandler();
     private var savedRegisterCall: CAPPluginCall? = nil;
     public var registered: Bool = false;
+    private var appDelegateRegistrationCalled: Bool = false;
 
     override public func load() {
         if(FirebaseApp.app() == nil) {
             FirebaseApp.configure();
         }
-        Messaging.messaging().delegate = self;
+        //Messaging.messaging().delegate = self;
         self.notificationDelegateHandler.plugin = self;
         self.bridge?.notificationRouter.pushNotificationHandler = self.notificationDelegateHandler;
         self.bridge?.notificationRouter.localNotificationHandler = self.notificationDelegateHandler;
@@ -52,22 +63,39 @@ public class FirebasePushPlugin: CAPPlugin, MessagingDelegate {
     }
 
     @objc func didRegisterWithToken(notification: NSNotification) {
-        if(self.savedRegisterCall == nil) {
-            return;
+        appDelegateRegistrationCalled = true
+         if(self.savedRegisterCall == nil) {
+             return;
+         }
+        if let deviceToken = notification.object as? Data {
+            let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
+            notifyListeners("token", data: [
+                "token": deviceTokenString
+            ])
+        } else if let stringToken = notification.object as? String {
+            notifyListeners("token", data: [
+                "token": stringToken
+            ])
+        } else {
+            notifyListeners("registrationError", data: [
+                "error": PushNotificationError.tokenParsingFailed.localizedDescription
+            ])
         }
-        let deviceToken = notification.object as! String
-        notifyListeners("token", data: [
-            "token": deviceToken
-        ])
+       
         self.registered = true;
         self.notificationDelegateHandler.sendStacked()
         self.savedRegisterCall?.resolve()
     }
 
+
     @objc func didFailToRegisterWithToken(notification: NSNotification) {
         let error = notification.object as! Error
-        self.savedRegisterCall?.reject(error.localizedDescription)
-        self.savedRegisterCall = nil
+                self.savedRegisterCall?.reject(error.localizedDescription)
+                self.savedRegisterCall = nil
+        
+        notifyListeners("registrationError", data: [
+            "error": error.localizedDescription
+        ])
     }
 
     @objc public func didReceiveRemoteNotification(notification: NSNotification) {
@@ -156,10 +184,4 @@ public class FirebasePushPlugin: CAPPlugin, MessagingDelegate {
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         call.resolve()
     }
-}
-
-enum PushNotificationsPermissions: String {
-    case prompt
-    case denied
-    case granted
 }
